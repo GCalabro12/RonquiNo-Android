@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Luna para la barra de notificaciones (blanca, Android la colorea) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M12.3,2.1C7.2,2.4 3.2,6.6 3.2,11.8c0,5.4 4.4,9.8 9.8,9.8c4.4,0 8.1,-2.9 9.4,-6.9c-0.9,0.4 -2,0.6 -3.1,0.6c-4.6,0 -8.3,-3.7 -8.3,-8.3c0,-1.8 0.5,-3.5 1.3,-4.9z" />
+</vector>
