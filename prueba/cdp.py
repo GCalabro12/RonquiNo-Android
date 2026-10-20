@@ -16,7 +16,7 @@ def pagina():
         except Exception:
             pass
         time.sleep(2)
-    sys.exit('No encuentro la web de Sleep Amable dentro de la app')
+    sys.exit('No encuentro la web de Amable Sleep dentro de la app')
 
 
 ws = websocket.create_connection(pagina(), suppress_origin=True, timeout=60)

@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * App Android de Sleep Amable: muestra la web de siempre (https://gcalabro12.github.io/Sleep-Amable/) y añade
+ * App Android de Amable Sleep: muestra la web de siempre (https://gcalabro12.github.io/Sleep-Amable/) y añade
  * lo que una web no puede hacer: poner y quitar «No molestar», apagar el wifi (Android 9 o anterior),
  * seguir escuchando / sonando con la pantalla apagada y que la musiquita de bienvenida suene sola.
  * La web sabe que está dentro de la app porque existe window.RonquiNoAndroid.
@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(-1, -1));
 
         cargando = new TextView(this);
-        cargando.setText("Sleep Amable");
+        cargando.setText("Amable Sleep");
         cargando.setTextColor(0xFFE8ECFA);
         cargando.setTextSize(30);
         cargando.setGravity(Gravity.CENTER);
@@ -233,7 +233,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface public boolean dndActivo() { return Modos.dndActivo(MainActivity.this); }
 
-        /** true si lo puso Sleep Amable (y lo quitará al terminar la noche). */
+        /** true si lo puso Amable Sleep (y lo quitará al terminar la noche). */
         @JavascriptInterface public boolean dndMio() { return Modos.dndMio(MainActivity.this); }
 
         /** Pone (true) o quita (false) «No molestar». Devuelve "ok", "sin-permiso" o "error". */
@@ -251,7 +251,7 @@ public class MainActivity extends Activity {
         // ---------- Wifi y modo avión ----------
         @JavascriptInterface public boolean wifiEncendido() { return Modos.wifiEncendido(MainActivity.this); }
 
-        /** ¿Puede Sleep Amable apagar el wifi él solo? Solo en Android 9 o anterior. */
+        /** ¿Puede Amable Sleep apagar el wifi él solo? Solo en Android 9 o anterior. */
         @JavascriptInterface public boolean wifiDirecto() { return Modos.wifiDirecto(); }
 
         @JavascriptInterface public boolean wifiMio() { return Modos.wifiMio(MainActivity.this); }

@@ -13,7 +13,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 
 /**
- * Servicio en primer plano mientras Sleep Amable escucha la noche o suena el ruido para dormir.
+ * Servicio en primer plano mientras Amable Sleep escucha la noche o suena el ruido para dormir.
  * Con él, Android no corta el micrófono ni el sonido al apagar la pantalla.
  */
 public class NocheService extends Service {
@@ -40,7 +40,7 @@ public class NocheService extends Service {
         PendingIntent pi = PendingIntent.getActivity(this, 0, abrir, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         Notification n = new Notification.Builder(this, CANAL)
                 .setSmallIcon(R.drawable.ic_stat_luna)
-                .setContentTitle(escuchando ? "Sleep Amable está escuchando" : "Sleep Amable: sonido para dormir")
+                .setContentTitle(escuchando ? "Amable Sleep está escuchando" : "Amable Sleep: sonido para dormir")
                 .setContentText(escuchando ? "Solo graba cuando suena algo. Toca para volver."
                         : "El sonido sigue con la pantalla apagada. Toca para volver.")
                 .setContentIntent(pi)

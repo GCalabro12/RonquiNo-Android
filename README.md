@@ -1,6 +1,6 @@
-# Sleep Amable · app Android
+# Amable Sleep (antes Sleep Amable / RonquiNo) · app Android
 
-App Android de [Sleep Amable](https://gcalabro12.github.io/Sleep-Amable/) (by Práctica Integral): muestra la web dentro de la app y añade lo que una web no puede hacer:
+App Android de [Amable Sleep](https://gcalabro12.github.io/Sleep-Amable/) (by Práctica Integral): muestra la web dentro de la app y añade lo que una web no puede hacer:
 
 - 🌙 Pone **«No molestar»** al empezar la noche y lo quita al terminar.
 - 📶 Apaga el wifi en Android 9 o anterior (desde Android 10 abre el panel del wifi).
