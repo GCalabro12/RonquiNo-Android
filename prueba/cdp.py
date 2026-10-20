@@ -11,12 +11,12 @@ def pagina():
     for _ in range(60):
         try:
             for p in json.load(urllib.request.urlopen('http://localhost:9222/json', timeout=5)):
-                if p.get('type') == 'page' and 'RonquiNo' in p.get('url', ''):
+                if p.get('type') == 'page' and 'Sleep-Amable' in p.get('url', ''):
                     return p['webSocketDebuggerUrl']
         except Exception:
             pass
         time.sleep(2)
-    sys.exit('No encuentro la web de RonquiNo dentro de la app')
+    sys.exit('No encuentro la web de Sleep Amable dentro de la app')
 
 
 ws = websocket.create_connection(pagina(), suppress_origin=True, timeout=60)

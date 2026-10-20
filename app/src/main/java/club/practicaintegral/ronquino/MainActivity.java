@@ -37,13 +37,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * App Android de RonquiNo: muestra la web de siempre (https://gcalabro12.github.io/RonquiNo/) y añade
+ * App Android de Sleep Amable: muestra la web de siempre (https://gcalabro12.github.io/Sleep-Amable/) y añade
  * lo que una web no puede hacer: poner y quitar «No molestar», apagar el wifi (Android 9 o anterior),
  * seguir escuchando / sonando con la pantalla apagada y que la musiquita de bienvenida suene sola.
  * La web sabe que está dentro de la app porque existe window.RonquiNoAndroid.
  */
 public class MainActivity extends Activity {
-    private static final String WEB = "https://gcalabro12.github.io/RonquiNo/";
+    private static final String WEB = "https://gcalabro12.github.io/Sleep-Amable/";
     private static final String HOST = "gcalabro12.github.io";
     private static final int REQ_MIC = 1, REQ_ARCHIVO = 2;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(-1, -1));
 
         cargando = new TextView(this);
-        cargando.setText("RonquiNo");
+        cargando.setText("Sleep Amable");
         cargando.setTextColor(0xFFE8ECFA);
         cargando.setTextSize(30);
         cargando.setGravity(Gravity.CENTER);
@@ -87,6 +87,10 @@ public class MainActivity extends Activity {
         // Con la pantalla apagada la web sigue a pleno rendimiento (detector y ruido)
         web.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
         web.addJavascriptInterface(new Puente(), "RonquiNoAndroid");
+        // Descargas (p. ej. la app nueva): se abren en el navegador, que es quien sabe instalarlas
+        web.setDownloadListener((url, ua, cd, mime, len) -> {
+            try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (RuntimeException ignored) {}
+        });
 
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -229,7 +233,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface public boolean dndActivo() { return Modos.dndActivo(MainActivity.this); }
 
-        /** true si lo puso RonquiNo (y lo quitará al terminar la noche). */
+        /** true si lo puso Sleep Amable (y lo quitará al terminar la noche). */
         @JavascriptInterface public boolean dndMio() { return Modos.dndMio(MainActivity.this); }
 
         /** Pone (true) o quita (false) «No molestar». Devuelve "ok", "sin-permiso" o "error". */
@@ -247,7 +251,7 @@ public class MainActivity extends Activity {
         // ---------- Wifi y modo avión ----------
         @JavascriptInterface public boolean wifiEncendido() { return Modos.wifiEncendido(MainActivity.this); }
 
-        /** ¿Puede RonquiNo apagar el wifi él solo? Solo en Android 9 o anterior. */
+        /** ¿Puede Sleep Amable apagar el wifi él solo? Solo en Android 9 o anterior. */
         @JavascriptInterface public boolean wifiDirecto() { return Modos.wifiDirecto(); }
 
         @JavascriptInterface public boolean wifiMio() { return Modos.wifiMio(MainActivity.this); }

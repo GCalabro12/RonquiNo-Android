@@ -29,7 +29,7 @@ final class Modos {
         return f != NotificationManager.INTERRUPTION_FILTER_ALL && f != NotificationManager.INTERRUPTION_FILTER_UNKNOWN;
     }
 
-    /** ¿Lo ha puesto RonquiNo (y lo quitará al terminar)? */
+    /** ¿Lo ha puesto Sleep Amable (y lo quitará al terminar)? */
     static boolean dndMio(Context c) {
         return prefs(c).getInt(DND_PREVIO, -1) == NotificationManager.INTERRUPTION_FILTER_ALL && dndActivo(c);
     }
@@ -84,7 +84,7 @@ final class Modos {
 
     static boolean wifiMio(Context c) { return prefs(c).getBoolean(WIFI_APAGADO, false); }
 
-    /** Si RonquiNo apagó el wifi, lo vuelve a encender. */
+    /** Si Sleep Amable apagó el wifi, lo vuelve a encender. */
     @SuppressWarnings("deprecation")
     static void encenderWifi(Context c) {
         if (!wifiMio(c)) return;

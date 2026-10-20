@@ -21,7 +21,7 @@
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
 
     <application
-        android:label="RonquiNo"
+        android:label="Sleep Amable"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:allowBackup="true"

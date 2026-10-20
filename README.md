@@ -1,6 +1,6 @@
-# RonquiNo · app Android
+# Sleep Amable · app Android
 
-App Android de [RonquiNo](https://gcalabro12.github.io/RonquiNo/) (by Práctica Integral): muestra la web dentro de la app y añade lo que una web no puede hacer:
+App Android de [Sleep Amable](https://gcalabro12.github.io/Sleep-Amable/) (by Práctica Integral): muestra la web dentro de la app y añade lo que una web no puede hacer:
 
 - 🌙 Pone **«No molestar»** al empezar la noche y lo quita al terminar.
 - 📶 Apaga el wifi en Android 9 o anterior (desde Android 10 abre el panel del wifi).
@@ -9,4 +9,4 @@ App Android de [RonquiNo](https://gcalabro12.github.io/RonquiNo/) (by Práctica 
 
 El modo avión no se puede activar desde ninguna app (Android lo prohíbe desde la versión 4.2).
 
-Descarga la última versión: https://github.com/GCalabro12/RonquiNo-Android/releases/latest/download/RonquiNo.apk
+Descarga la última versión: https://github.com/GCalabro12/Sleep-Amable-Android/releases/latest/download/SleepAmable.apk

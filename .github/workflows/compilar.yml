@@ -37,15 +37,15 @@ jobs:
         run: gradle assembleRelease --no-daemon --stacktrace
 
       - name: Preparar APK
-        run: cp app/build/outputs/apk/release/app-release.apk RonquiNo.apk
+        run: cp app/build/outputs/apk/release/app-release.apk SleepAmable.apk
 
       - name: Publicar descarga
         uses: softprops/action-gh-release@v2
         with:
           tag_name: app-${{ github.run_number }}
-          name: RonquiNo v${{ env.VERSION_NAME }}
+          name: Sleep Amable v${{ env.VERSION_NAME }}
           body: |
-            Descarga **RonquiNo.apk** en el móvil y ábrelo para instalar o actualizar.
-            Enlace fijo a la última versión: https://github.com/${{ github.repository }}/releases/latest/download/RonquiNo.apk
-          files: RonquiNo.apk
+            Descarga **SleepAmable.apk** en el móvil y ábrelo para instalar o actualizar.
+            Enlace fijo a la última versión: https://github.com/${{ github.repository }}/releases/latest/download/SleepAmable.apk
+          files: SleepAmable.apk
           make_latest: true
