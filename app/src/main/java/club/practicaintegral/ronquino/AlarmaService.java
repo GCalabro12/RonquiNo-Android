@@ -25,6 +25,11 @@ public class AlarmaService extends Service {
     static volatile boolean sonando;
     static String tonoActual = "amanecer";
     static int subActual = 120;
+    /** Alarma reforzada: la prueba para apagarla ("" = basta el botón) y el código de barras guardado. */
+    static String retoActual = "", codActual = "";
+    /** Mientras se hace la prueba el volumen baja (hasta esta hora); si se deja, vuelve a sonar fuerte. */
+    static volatile long bajoHasta;
+    static void bajar(int seg) { bajoHasta = System.currentTimeMillis() + seg * 1000L; }
     private MediaPlayer mp;
     private PowerManager.WakeLock cpu;
     private final Handler h = new Handler(Looper.getMainLooper());
@@ -35,11 +40,15 @@ public class AlarmaService extends Service {
         String accion = intent != null ? intent.getAction() : null;
         if ("APAGAR".equals(accion)) { parar(); return START_NOT_STICKY; }
         if ("DISCRETO".equals(accion)) { discreto(); return START_NOT_STICKY; }
-        if ("POSPONER".equals(accion)) { Alarmas.posponer(this, tonoActual, subActual, intent.getIntExtra("min", 9)); parar(); return START_NOT_STICKY; }
+        if ("POSPONER".equals(accion)) { Alarmas.posponer(this, tonoActual, subActual, intent.getIntExtra("min", 9), retoActual, codActual); parar(); return START_NOT_STICKY; }
 
         if (intent != null) {
             tonoActual = intent.getStringExtra("tono") != null ? intent.getStringExtra("tono") : "amanecer";
             subActual = intent.getIntExtra("sub", 120);
+            retoActual = intent.getStringExtra("reto") != null ? intent.getStringExtra("reto") : "";
+            codActual = intent.getStringExtra("cod") != null ? intent.getStringExtra("cod") : "";
+            if ("codigo".equals(retoActual) && codActual.isEmpty()) retoActual = "cuentas";
+            bajoHasta = 0;
         }
         NotificationManager nm = getSystemService(NotificationManager.class);
         NotificationChannel ch = new NotificationChannel(CANAL, "Alarmas", NotificationManager.IMPORTANCE_HIGH);
@@ -47,17 +56,16 @@ public class AlarmaService extends Service {
         nm.createNotificationChannel(ch);
         PendingIntent pantalla = PendingIntent.getActivity(this, 2, new Intent(this, AlarmaActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification n = new Notification.Builder(this, CANAL)
+        Notification.Builder nb = new Notification.Builder(this, CANAL)
                 .setSmallIcon(R.drawable.ic_stat_luna)
                 .setContentTitle("☀️ ¡Buenos días!")
                 .setContentText("Amable Sleep · alarma")
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setFullScreenIntent(pantalla, true)
                 .setContentIntent(pantalla)
-                .addAction(new Notification.Action.Builder(null, "Posponer 9 min", accionPI("POSPONER", 3)).build())
-                .addAction(new Notification.Action.Builder(null, "Apagar", accionPI("APAGAR", 4)).build())
-                .setOngoing(true)
-                .build();
+                .setOngoing(true);
+        acciones(nb);
+        Notification n = nb.build();
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) startForeground(7, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             else startForeground(7, n);
@@ -79,16 +87,21 @@ public class AlarmaService extends Service {
         nm.createNotificationChannel(new NotificationChannel("alarma_baja", "Alarma sonando", NotificationManager.IMPORTANCE_LOW));
         PendingIntent pantalla = PendingIntent.getActivity(this, 2, new Intent(this, AlarmaActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        nm.notify(7, new Notification.Builder(this, "alarma_baja")
+        Notification.Builder nb = new Notification.Builder(this, "alarma_baja")
                 .setSmallIcon(R.drawable.ic_stat_luna)
                 .setContentTitle("☀️ ¡Buenos días!")
                 .setContentText("Toca para ver la alarma")
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setContentIntent(pantalla)
-                .addAction(new Notification.Action.Builder(null, "Posponer 9 min", accionPI("POSPONER", 3)).build())
-                .addAction(new Notification.Action.Builder(null, "Apagar", accionPI("APAGAR", 4)).build())
-                .setOngoing(true)
-                .build());
+                .setOngoing(true);
+        acciones(nb);
+        nm.notify(7, nb.build());
+    }
+
+    /** Posponer siempre; «Apagar» desde el aviso solo si la alarma no es reforzada (si no, se apaga haciendo la prueba). */
+    private void acciones(Notification.Builder nb) {
+        nb.addAction(new Notification.Action.Builder(null, "Posponer 9 min", accionPI("POSPONER", 3)).build());
+        if (retoActual.isEmpty()) nb.addAction(new Notification.Action.Builder(null, "Apagar", accionPI("APAGAR", 4)).build());
     }
 
     private PendingIntent accionPI(String accion, int code) {
@@ -112,7 +125,7 @@ public class AlarmaService extends Service {
             mp.start();
             sonando = true;
             t0 = System.currentTimeMillis();
-            if (subActual > 0) h.post(subir);
+            h.post(subir);
         } catch (Exception e) { parar(); }
     }
 
@@ -126,10 +139,11 @@ public class AlarmaService extends Service {
     private final Runnable subir = new Runnable() {
         @Override public void run() {
             if (mp == null) return;
-            float k = Math.min(1f, (System.currentTimeMillis() - t0) / (subActual * 1000f));
+            float k = subActual > 0 ? Math.min(1f, (System.currentTimeMillis() - t0) / (subActual * 1000f)) : 1f;
             float v = ganancia(k);
+            if (System.currentTimeMillis() < bajoHasta) v = Math.min(v, 0.08f); // haciendo la prueba: bajito
             try { mp.setVolume(v, v); } catch (IllegalStateException ignored) {}
-            if (k < 1f) h.postDelayed(this, 200);
+            h.postDelayed(this, 200);
         }
     };
 

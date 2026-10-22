@@ -21,7 +21,7 @@ public class Alarmas {
 
     static SharedPreferences prefs(Context c) { return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE); }
 
-    /** Guarda la lista que manda la web: [{id, on, hora:"07:30", tono, sub}] y la vuelve a programar. */
+    /** Guarda la lista que manda la web: [{id, on, hora:"07:30", tono, sub, reto, cod}] y la vuelve a programar. */
     static void guardar(Context c, String json) {
         // Antes de cambiar la lista, quita las que había programadas
         cancelarLista(c);
@@ -49,16 +49,19 @@ public class Alarmas {
                 cal.set(Calendar.MINUTE, Integer.parseInt(hm[1]));
                 cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0);
                 if (cal.getTimeInMillis() <= System.currentTimeMillis() + 1000) cal.add(Calendar.DAY_OF_MONTH, 1);
-                programar(c, codigo(al), cal.getTimeInMillis(), al.optString("tono", "amanecer"), al.optInt("sub", 120));
+                programar(c, codigo(al), cal.getTimeInMillis(), al.optString("tono", "amanecer"), al.optInt("sub", 120),
+                        al.optString("reto", ""), al.optString("cod", ""));
             }
         } catch (Exception ignored) {}
     }
 
     static int codigo(JSONObject al) { return (int) (al.optLong("id") % 800000); }
 
-    static void programar(Context c, int codigo, long cuando, String tono, int sub) {
+    /** reto: "" (se apaga con el botón), "pasos", "cuentas" o "codigo" (alarma reforzada); cod: el código de barras guardado. */
+    static void programar(Context c, int codigo, long cuando, String tono, int sub, String reto, String cod) {
         AlarmManager am = c.getSystemService(AlarmManager.class);
-        Intent i = new Intent(c, AlarmaReceiver.class).setAction("SONAR").putExtra("tono", tono).putExtra("sub", sub).putExtra("codigo", codigo);
+        Intent i = new Intent(c, AlarmaReceiver.class).setAction("SONAR").putExtra("tono", tono).putExtra("sub", sub).putExtra("codigo", codigo)
+                .putExtra("reto", reto).putExtra("cod", cod);
         PendingIntent pi = PendingIntent.getBroadcast(c, codigo, i, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent ver = PendingIntent.getActivity(c, 1, new Intent(c, MainActivity.class), PendingIntent.FLAG_IMMUTABLE);
         try {
@@ -77,14 +80,14 @@ public class Alarmas {
     /** Siesta: suena dentro de «min» minutos. Devuelve la hora (ms) a la que sonará. */
     static long siesta(Context c, int min, String tono, int sub) {
         long cuando = System.currentTimeMillis() + min * 60_000L;
-        programar(c, ID_SIESTA, cuando, tono, sub);
+        programar(c, ID_SIESTA, cuando, tono, sub, "", "");
         return cuando;
     }
 
     static void cancelarSiesta(Context c) { cancelar(c, ID_SIESTA); }
 
     /** «Posponer»: la misma alarma vuelve a sonar dentro de «min» minutos (1, 3, 5 o 9). */
-    static void posponer(Context c, String tono, int sub, int min) {
-        programar(c, ID_POSPUESTA, System.currentTimeMillis() + Math.max(1, min) * 60_000L, tono, sub);
+    static void posponer(Context c, String tono, int sub, int min, String reto, String cod) {
+        programar(c, ID_POSPUESTA, System.currentTimeMillis() + Math.max(1, min) * 60_000L, tono, sub, reto, cod);
     }
 }

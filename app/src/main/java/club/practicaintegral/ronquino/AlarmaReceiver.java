@@ -23,7 +23,9 @@ public class AlarmaReceiver extends BroadcastReceiver {
         Modos.quitarDnd(c);
         Intent s = new Intent(c, AlarmaService.class)
                 .putExtra("tono", i.getStringExtra("tono"))
-                .putExtra("sub", i.getIntExtra("sub", 120));
+                .putExtra("sub", i.getIntExtra("sub", 120))
+                .putExtra("reto", i.getStringExtra("reto"))
+                .putExtra("cod", i.getStringExtra("cod"));
         try { c.startForegroundService(s); } catch (RuntimeException ignored) {}
     }
 }

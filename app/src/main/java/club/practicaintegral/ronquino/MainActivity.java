@@ -30,6 +30,10 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
+
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -182,6 +186,11 @@ public class MainActivity extends Activity {
         archivoPendiente = null;
     }
 
+    private void codigoEscaneado(String valor, String error) {
+        runOnUiThread(() -> web.evaluateJavascript("window.codigoEscaneado && window.codigoEscaneado("
+                + JSONObject.quote(valor == null ? "" : valor) + "," + JSONObject.quote(error) + ")", null));
+    }
+
     /** Al volver de los ajustes de Android (permiso de «No molestar», wifi…), la web se pone al día. */
     @Override
     protected void onResume() {
@@ -231,6 +240,17 @@ public class MainActivity extends Activity {
         // ---- Alarmas que suenan con la app cerrada (las programa el reloj de Android) ----
         /** La web manda su lista de alarmas: [{id, on, hora, tono, sub}] */
         @JavascriptInterface public void setAlarmas(String json) { Alarmas.guardar(MainActivity.this, json); }
+        /** Alarma reforzada: abre el lector de códigos de barras; la respuesta llega a window.codigoEscaneado(valor, error). */
+        @JavascriptInterface public void escanearCodigo() {
+            runOnUiThread(() -> {
+                try {
+                    GmsBarcodeScanning.getClient(MainActivity.this).startScan()
+                            .addOnSuccessListener(b -> codigoEscaneado(b.getRawValue(), ""))
+                            .addOnCanceledListener(() -> codigoEscaneado("", "cancelado"))
+                            .addOnFailureListener(e -> codigoEscaneado("", String.valueOf(e.getMessage())));
+                } catch (RuntimeException e) { codigoEscaneado("", String.valueOf(e.getMessage())); }
+            });
+        }
         /** Siesta de «min» minutos; devuelve la hora (ms) a la que sonará. */
         @JavascriptInterface public double siesta(int min, String tono, int sub) { return Alarmas.siesta(MainActivity.this, min, tono, sub); }
         @JavascriptInterface public void cancelarSiesta() { Alarmas.cancelarSiesta(MainActivity.this); }
