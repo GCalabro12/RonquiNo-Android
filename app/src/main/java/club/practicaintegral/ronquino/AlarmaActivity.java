@@ -68,7 +68,7 @@ public class AlarmaActivity extends Activity {
         LinearLayout fila = new LinearLayout(this);
         fila.setOrientation(LinearLayout.HORIZONTAL);
         fila.setGravity(Gravity.CENTER);
-        for (int m : new int[]{1, 3, 5, 9}) fila.addView(boton(m + " min", 0xFF312E81, 0xFFE0E7FF, 22, () -> pulsar("POSPONER", m), true));
+        for (int m : new int[]{1, 3, 5, 9}) fila.addView(boton(m + " min", 0xFF312E81, 0xFFE0E7FF, 17, () -> pulsar("POSPONER", m), true));
         col.addView(fila, new LinearLayout.LayoutParams(-1, -2));
 
         Button apagar = boton("☀️ Apagar", 0xFFFDE68A, 0xFF1E1B4B, 24, () -> pulsar("APAGAR", 0), false);
@@ -85,6 +85,8 @@ public class AlarmaActivity extends Activity {
         col.addView(luna, lpl);
 
         setContentView(col);
+        // Con la pantalla completa a la vista, el aviso de arriba sobra (tapaba el reloj): pasa a ser discreto
+        try { startService(new Intent(this, AlarmaService.class).setAction("DISCRETO")); } catch (RuntimeException ignored) {}
         animarLuna();
         tic.run();
     }
@@ -115,6 +117,7 @@ public class AlarmaActivity extends Activity {
     private Button boton(String txt, int fondo, int color, int sp, Runnable r, boolean enFila) {
         Button bt = new Button(this);
         bt.setText(txt); bt.setTextColor(color); bt.setTextSize(sp); bt.setAllCaps(false);
+        bt.setSingleLine(true); bt.setPadding(0, 0, 0, 0); bt.setMinWidth(0); bt.setMinimumWidth(0);
         GradientDrawable g = new GradientDrawable(); g.setColor(fondo); g.setCornerRadius(dp(18));
         bt.setBackground(g);
         if (enFila) {

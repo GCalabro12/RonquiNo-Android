@@ -34,6 +34,7 @@ public class AlarmaService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String accion = intent != null ? intent.getAction() : null;
         if ("APAGAR".equals(accion)) { parar(); return START_NOT_STICKY; }
+        if ("DISCRETO".equals(accion)) { discreto(); return START_NOT_STICKY; }
         if ("POSPONER".equals(accion)) { Alarmas.posponer(this, tonoActual, subActual, intent.getIntExtra("min", 9)); parar(); return START_NOT_STICKY; }
 
         if (intent != null) {
@@ -69,6 +70,25 @@ public class AlarmaService extends Service {
         sonar();
         try { startActivity(new Intent(this, AlarmaActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); } catch (RuntimeException ignored) {}
         return START_NOT_STICKY;
+    }
+
+    /** Mismo aviso, pero en un canal sin ventanita emergente (la pantalla completa ya está a la vista). */
+    private void discreto() {
+        if (!sonando) return;
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        nm.createNotificationChannel(new NotificationChannel("alarma_baja", "Alarma sonando", NotificationManager.IMPORTANCE_LOW));
+        PendingIntent pantalla = PendingIntent.getActivity(this, 2, new Intent(this, AlarmaActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        nm.notify(7, new Notification.Builder(this, "alarma_baja")
+                .setSmallIcon(R.drawable.ic_stat_luna)
+                .setContentTitle("☀️ ¡Buenos días!")
+                .setContentText("Toca para ver la alarma")
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setContentIntent(pantalla)
+                .addAction(new Notification.Action.Builder(null, "Posponer 9 min", accionPI("POSPONER", 3)).build())
+                .addAction(new Notification.Action.Builder(null, "Apagar", accionPI("APAGAR", 4)).build())
+                .setOngoing(true)
+                .build());
     }
 
     private PendingIntent accionPI(String accion, int code) {
