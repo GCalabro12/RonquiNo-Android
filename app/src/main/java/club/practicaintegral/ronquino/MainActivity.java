@@ -235,6 +235,25 @@ public class MainActivity extends Activity {
         @JavascriptInterface public double siesta(int min, String tono, int sub) { return Alarmas.siesta(MainActivity.this, min, tono, sub); }
         @JavascriptInterface public void cancelarSiesta() { Alarmas.cancelarSiesta(MainActivity.this); }
         @JavascriptInterface public boolean alarmaSonando() { return AlarmaService.sonando; }
+        /** ¿Puede la alarma salir a pantalla completa aunque se esté usando el móvil? */
+        @JavascriptInterface public boolean puedePantallaCompleta() {
+            boolean sobre = android.provider.Settings.canDrawOverlays(MainActivity.this);
+            boolean fsi = Build.VERSION.SDK_INT < 34 || getSystemService(android.app.NotificationManager.class).canUseFullScreenIntent();
+            return sobre && fsi;
+        }
+        /** Abre el ajuste de Android que hace falta («Mostrar sobre otras apps» o «Notificaciones a pantalla completa»). */
+        @JavascriptInterface public void pedirPantallaCompleta() {
+            runOnUiThread(() -> {
+                Intent i;
+                if (!android.provider.Settings.canDrawOverlays(MainActivity.this))
+                    i = new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                else
+                    i = new Intent("android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", Uri.parse("package:" + getPackageName()));
+                try { startActivity(i); } catch (RuntimeException e) {
+                    try { startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))); } catch (RuntimeException ignored) {}
+                }
+            });
+        }
 
         // ---------- No molestar ----------
         @JavascriptInterface public boolean hasDndAccess() { return Modos.dndAcceso(MainActivity.this); }

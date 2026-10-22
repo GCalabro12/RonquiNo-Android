@@ -83,8 +83,8 @@ public class Alarmas {
 
     static void cancelarSiesta(Context c) { cancelar(c, ID_SIESTA); }
 
-    /** «Posponer 9 min»: la misma alarma vuelve a sonar dentro de 9 minutos. */
-    static void posponer(Context c, String tono, int sub) {
-        programar(c, ID_POSPUESTA, System.currentTimeMillis() + 9 * 60_000L, tono, sub);
+    /** «Posponer»: la misma alarma vuelve a sonar dentro de «min» minutos (1, 3, 5 o 9). */
+    static void posponer(Context c, String tono, int sub, int min) {
+        programar(c, ID_POSPUESTA, System.currentTimeMillis() + Math.max(1, min) * 60_000L, tono, sub);
     }
 }

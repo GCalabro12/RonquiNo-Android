@@ -34,7 +34,7 @@ public class AlarmaService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String accion = intent != null ? intent.getAction() : null;
         if ("APAGAR".equals(accion)) { parar(); return START_NOT_STICKY; }
-        if ("POSPONER".equals(accion)) { Alarmas.posponer(this, tonoActual, subActual); parar(); return START_NOT_STICKY; }
+        if ("POSPONER".equals(accion)) { Alarmas.posponer(this, tonoActual, subActual, intent.getIntExtra("min", 9)); parar(); return START_NOT_STICKY; }
 
         if (intent != null) {
             tonoActual = intent.getStringExtra("tono") != null ? intent.getStringExtra("tono") : "amanecer";
@@ -72,7 +72,7 @@ public class AlarmaService extends Service {
     }
 
     private PendingIntent accionPI(String accion, int code) {
-        return PendingIntent.getService(this, code, new Intent(this, AlarmaService.class).setAction(accion),
+        return PendingIntent.getService(this, code, new Intent(this, AlarmaService.class).setAction(accion).putExtra("min", 9),
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
