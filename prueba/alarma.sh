@@ -26,7 +26,7 @@ J "window.RonquiNoAndroid.setAlarmas(JSON.stringify([{id: 123, on: true, hora: '
 sleep 1
 check "Alarma diaria programada en el reloj de Android" "$(adb shell dumpsys alarm | grep -c "$PKG" | awk '{print ($1>0)?1:0}')" 1
 # Siesta de 1 minuto y se cierra la app
-J "window.RonquiNoAndroid.siesta(1, 'amanecer', 0); 'siesta'"
+J "window.RonquiNoAndroid.siesta(1, 'amanecer', 120); 'siesta con subida de 2 min'"
 adb shell input keyevent KEYCODE_HOME
 sleep 2
 adb shell am kill $PKG
@@ -36,6 +36,14 @@ sleep 70
 adb exec-out screencap -p > captura-alarma.png
 check "Suena el servicio de alarma con la app cerrada" "$(adb shell dumpsys activity services $PKG | grep -c 'AlarmaService' | awk '{print ($1>0)?1:0}')" 1
 check "Sale la pantalla «¡Buenos días!»" "$(adb shell dumpsys activity activities | grep -c 'AlarmaActivity' | awk '{print ($1>0)?1:0}')" 1
+# La subida de volumen: el reproductor de la alarma debe empezar casi en silencio e ir subiendo
+vol() { adb shell dumpsys audio | grep -i "USAGE_ALARM" | grep -o -i "volume[:=][ ]*[0-9.]*" | head -1 | grep -o "[0-9.]*$"; }
+V1=$(vol); sleep 45; V2=$(vol)
+echo "Volumen del reproductor: al empezar ${V1:-?} · a los 45 s ${V2:-?}"
+if [ -n "$V1" ] && [ -n "$V2" ]; then
+  check "El volumen empieza bajo" "$(python3 -c "print(int($V1 < 0.05))")" 1
+  check "El volumen va subiendo" "$(python3 -c "print(int($V2 > $V1))")" 1
+fi
 adb shell dumpsys audio | grep -i -m3 "USAGE_ALARM" || true
 echo "Fallos: $FALLOS"
 [ "$FALLOS" = 0 ]
