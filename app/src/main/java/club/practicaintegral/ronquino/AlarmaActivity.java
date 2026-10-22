@@ -37,7 +37,7 @@ import java.util.Random;
  * Pantalla completa «¡Buenos días!» cuando suena una alarma (también encima del bloqueo):
  * reloj grande arriba, botones para posponer 1, 3, 5 o 9 minutos o apagar, y la luna abajo
  * saludando y dando saltitos.
- * Alarma reforzada: «Apagar» abre una prueba (caminar 20 pasos, 3 cuentas o escanear el código guardado);
+ * Prueba para apagar (Ajustes): «Apagar» abre una prueba (caminar 20 pasos, 3 cuentas o escanear el código guardado);
  * mientras se hace, el volumen baja, y la alarma solo se apaga al terminarla.
  */
 public class AlarmaActivity extends Activity {
@@ -83,13 +83,13 @@ public class AlarmaActivity extends Activity {
         col.addView(fila, new LinearLayout.LayoutParams(-1, -2));
 
         boolean reforzada = !AlarmaService.retoActual.isEmpty();
-        Button apagar = boton(reforzada ? "💪 Apagar" : "☀️ Apagar", 0xFFFDE68A, 0xFF1E1B4B, 24,
+        Button apagar = boton("☀️ Apagar", 0xFFFDE68A, 0xFF1E1B4B, 24,
                 () -> { if (reforzada) prueba(); else pulsar("APAGAR", 0); }, false);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, dp(76));
         lp.setMargins(dp(8), dp(18), dp(8), 0);
         col.addView(apagar, lp);
         if (reforzada) {
-            TextView nota = texto("Alarma reforzada: para apagarla, " + queHacer(AlarmaService.retoActual), 0xFFC7D2FE, 15);
+            TextView nota = texto("Para apagarla, " + queHacer(AlarmaService.retoActual), 0xFFC7D2FE, 15);
             nota.setPadding(0, dp(8), 0, 0);
             col.addView(nota);
         }
