@@ -307,6 +307,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void restaurar() { Modos.restaurar(MainActivity.this); }
         @JavascriptInterface public void audioNormal() { Modos.audioNormal(MainActivity.this); }
 
+        // ---------- Aviso de ronquido por los auriculares ----------
+        @JavascriptInterface public boolean auriculares() { return Aviso.auriculares(MainActivity.this); }
+        @JavascriptInterface public void prepararVoz() { runOnUiThread(() -> Aviso.preparar(MainActivity.this)); }
+        @JavascriptInterface public boolean decir(String texto) { return Aviso.decir(MainActivity.this, texto); }
+
         // ---------- La noche ----------
         /** Empieza (true) o termina (false) la escucha: pantalla encendida + servicio con el micrófono. Al terminar, todo como estaba. */
         @JavascriptInterface public void noche(boolean on) {

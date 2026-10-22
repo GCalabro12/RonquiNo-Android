@@ -27,6 +27,11 @@
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
 
+    <!-- La voz del aviso de ronquido (Android 11+ necesita poder ver el motor de voz) -->
+    <queries>
+        <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
+    </queries>
+
     <application
         android:label="Amable Sleep"
         android:icon="@mipmap/ic_launcher"
