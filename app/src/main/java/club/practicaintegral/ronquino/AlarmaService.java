@@ -107,7 +107,7 @@ public class AlarmaService extends Service {
             mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + res));
             mp.setLooping(true);
             mp.prepare();
-            float v0 = subActual > 0 ? .03f : 1f;
+            float v0 = subActual > 0 ? ganancia(0) : 1f;
             mp.setVolume(v0, v0);
             mp.start();
             sonando = true;
@@ -116,12 +116,18 @@ public class AlarmaService extends Service {
         } catch (Exception e) { parar(); }
     }
 
-    /** Despertar suave: el volumen sube de 3 % a 100 % en «sub» segundos. */
+    /**
+     * Subida que el oído nota pareja: en decibelios, de −50 dB (casi en silencio) a 0 dB (volumen completo).
+     * Subirla en línea recta (de 3 % a 100 %) se oía fuerte casi desde el principio.
+     */
+    static float ganancia(float k) { return k >= 1f ? 1f : (float) Math.pow(10, (-50 + 50 * k) / 20.0); }
+
+    /** Despertar suave: el volumen sube poco a poco durante «sub» segundos. */
     private final Runnable subir = new Runnable() {
         @Override public void run() {
             if (mp == null) return;
             float k = Math.min(1f, (System.currentTimeMillis() - t0) / (subActual * 1000f));
-            float v = .03f + .97f * k;
+            float v = ganancia(k);
             try { mp.setVolume(v, v); } catch (IllegalStateException ignored) {}
             if (k < 1f) h.postDelayed(this, 200);
         }
