@@ -305,6 +305,7 @@ public class MainActivity extends Activity {
 
         /** Deja «No molestar» y el wifi como estaban antes de la noche. */
         @JavascriptInterface public void restaurar() { Modos.restaurar(MainActivity.this); }
+        @JavascriptInterface public void audioNormal() { Modos.audioNormal(MainActivity.this); }
 
         // ---------- La noche ----------
         /** Empieza (true) o termina (false) la escucha: pantalla encendida + servicio con el micrófono. Al terminar, todo como estaba. */
