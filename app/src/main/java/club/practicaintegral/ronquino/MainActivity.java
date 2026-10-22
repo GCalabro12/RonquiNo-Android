@@ -228,6 +228,14 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface public int android() { return Build.VERSION.SDK_INT; }
 
+        // ---- Alarmas que suenan con la app cerrada (las programa el reloj de Android) ----
+        /** La web manda su lista de alarmas: [{id, on, hora, tono, sub}] */
+        @JavascriptInterface public void setAlarmas(String json) { Alarmas.guardar(MainActivity.this, json); }
+        /** Siesta de «min» minutos; devuelve la hora (ms) a la que sonará. */
+        @JavascriptInterface public double siesta(int min, String tono, int sub) { return Alarmas.siesta(MainActivity.this, min, tono, sub); }
+        @JavascriptInterface public void cancelarSiesta() { Alarmas.cancelarSiesta(MainActivity.this); }
+        @JavascriptInterface public boolean alarmaSonando() { return AlarmaService.sonando; }
+
         // ---------- No molestar ----------
         @JavascriptInterface public boolean hasDndAccess() { return Modos.dndAcceso(MainActivity.this); }
 
