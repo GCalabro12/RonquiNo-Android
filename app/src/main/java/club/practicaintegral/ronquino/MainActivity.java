@@ -291,6 +291,15 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface public void encenderWifi() { Modos.encenderWifi(MainActivity.this); }
+        /** ¿Está puesto el modo avión? (leerlo sí se puede; cambiarlo, no: Android no lo deja a ninguna app) */
+        @JavascriptInterface public boolean modoAvion() {
+            return Settings.Global.getInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+        }
+        /** Abre el panel del wifi para encenderlo (desde Android 10 una app no puede encenderlo sola). */
+        @JavascriptInterface public void abrirPanelWifi() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) abrir(new Intent(Settings.Panel.ACTION_WIFI));
+            else Modos.encenderWifi(MainActivity.this);
+        }
 
         /** Android no deja que ninguna app ponga el modo avión: solo se puede abrir su pantalla de ajustes. */
         @JavascriptInterface public void abrirModoAvion() {
