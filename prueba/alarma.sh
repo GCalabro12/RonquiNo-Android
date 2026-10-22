@@ -8,6 +8,7 @@ check() { if [ "$2" = "$3" ]; then echo "✅ $1"; else echo "❌ $1 (sale «$2»
 FALLOS=0
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell pm grant $PKG android.permission.POST_NOTIFICATIONS || true
+adb shell appops set $PKG SYSTEM_ALERT_WINDOW allow || true   # «Mostrar sobre otras apps»: alarma a pantalla completa
 adb shell am start -n $PKG/.MainActivity
 # Espera a que la web cargue dentro de la app (en el emulador la primera carga tarda)
 for i in $(seq 1 30); do
