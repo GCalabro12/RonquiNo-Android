@@ -9,9 +9,15 @@ FALLOS=0
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell pm grant $PKG android.permission.POST_NOTIFICATIONS || true
 adb shell am start -n $PKG/.MainActivity
-sleep 8
-PID=$(adb shell pidof $PKG | tr -d '\r')
-adb forward tcp:9222 localabstract:webview_devtools_remote_$PID
+# Espera a que la web cargue dentro de la app (en el emulador la primera carga tarda)
+for i in $(seq 1 30); do
+  sleep 4
+  PID=$(adb shell pidof $PKG | tr -d '')
+  [ -n "$PID" ] && adb forward tcp:9222 localabstract:webview_devtools_remote_$PID >/dev/null 2>&1
+  OK=$(python3 prueba/cdp.py "document.getElementById('ver') ? 'si' : 'no'" 2>/dev/null || true)
+  echo "intento $i: $OK"
+  [ "$OK" = "si" ] && break
+done
 J "new Promise(r => { const t = setInterval(() => { if (document.getElementById('ver')?.textContent) { clearInterval(t); r(document.getElementById('ver').textContent); } }, 500); })"
 check "La web ve las alarmas nativas" "$(J '!!(window.RonquiNoAndroid && window.RonquiNoAndroid.setAlarmas)')" true
 # Una alarma diaria a las 07:30 queda programada en Android
