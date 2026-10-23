@@ -51,6 +51,15 @@ final class Aviso {
         return false;
     }
 
+    /** Lo dice por donde suene el móvil (altavoz o auriculares): la voz de Luna cuando la de Gemini no llega. */
+    static void hablar(Context c, String texto) {
+        preparar(c);
+        if (listo) tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "luna");
+        else pendiente = texto;
+    }
+
+    static void callar() { if (tts != null) tts.stop(); pendiente = null; }
+
     /** Lo dice solo si hay auriculares; sin ellos no suena nada y devuelve false. */
     static boolean decir(Context c, String texto) {
         if (!auriculares(c)) return false;
