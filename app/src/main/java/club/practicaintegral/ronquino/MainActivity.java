@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
@@ -49,7 +50,7 @@ import java.util.List;
 public class MainActivity extends Activity {
     private static final String WEB = "https://gcalabro12.github.io/Sleep-Amable/";
     private static final String HOST = "gcalabro12.github.io";
-    private static final int REQ_MIC = 1, REQ_ARCHIVO = 2;
+    private static final int REQ_MIC = 1, REQ_ARCHIVO = 2, REQ_VOZ = 3;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private WebView web;
     private TextView cargando;
@@ -181,9 +182,19 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
+        if (req == REQ_VOZ) { // dictado para «Habla con Luna»
+            ArrayList<String> r = data != null ? data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) : null;
+            dictado(r != null && !r.isEmpty() ? r.get(0) : "", res == RESULT_OK ? "" : "cancelado");
+            return;
+        }
         if (req != REQ_ARCHIVO || archivoPendiente == null) return;
         archivoPendiente.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(res, data));
         archivoPendiente = null;
+    }
+
+    private void dictado(String texto, String error) {
+        runOnUiThread(() -> web.evaluateJavascript("window.dictado && window.dictado("
+                + JSONObject.quote(texto == null ? "" : texto) + "," + JSONObject.quote(error) + ")", null));
     }
 
     private void codigoEscaneado(String valor, String error) {
@@ -240,6 +251,17 @@ public class MainActivity extends Activity {
         // ---- Alarmas que suenan con la app cerrada (las programa el reloj de Android) ----
         /** La web manda su lista de alarmas: [{id, on, hora, tono, sub}] */
         @JavascriptInterface public void setAlarmas(String json) { Alarmas.guardar(MainActivity.this, json); }
+        /** Dictar la pregunta a Luna con el reconocimiento de voz de Android; el texto llega a window.dictado(texto, error). */
+        @JavascriptInterface public void dictar() {
+            runOnUiThread(() -> {
+                try {
+                    startActivityForResult(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                            .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                            .putExtra(RecognizerIntent.EXTRA_PROMPT, "Pregúntale a Luna"), REQ_VOZ);
+                } catch (RuntimeException e) { dictado("", "sin-dictado"); }
+            });
+        }
         /** Alarma reforzada: abre el lector de códigos de barras; la respuesta llega a window.codigoEscaneado(valor, error). */
         @JavascriptInterface public void escanearCodigo() {
             runOnUiThread(() -> {
