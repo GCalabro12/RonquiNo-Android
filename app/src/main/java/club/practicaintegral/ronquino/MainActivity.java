@@ -353,6 +353,8 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void restaurar() { Modos.restaurar(MainActivity.this); }
         /** Luz de la habitación (lux) durante la noche; -1 si el móvil no tiene sensor de luz. */
         @JavascriptInterface public double luz() { return Luz.lux; }
+        @JavascriptInterface public boolean micBluetooth() { return Modos.micBluetooth(MainActivity.this); }
+        @JavascriptInterface public void micMovil() { Modos.micMovil(MainActivity.this); }
         /** Batería de los pinganillos (%), -1 si no se sabe, -2 si falta el permiso de bluetooth. */
         @JavascriptInterface public int bateriaAuriculares() { return Bateria.auriculares(MainActivity.this); }
         @JavascriptInterface public void pedirBluetooth() {

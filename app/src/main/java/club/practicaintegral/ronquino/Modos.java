@@ -150,6 +150,28 @@ final class Modos {
      * Mientras el micrófono graba, Android puede poner el móvil en «modo comunicación» (como en una llamada)
      * y entonces el timbre de las llamadas no suena. Al acabar la noche se deja en modo normal.
      */
+    /** ¿Está grabando con el micrófono de unos auriculares bluetooth (en vez del del móvil)? */
+    static boolean micBluetooth(Context c) {
+        try {
+            AudioManager am = c.getSystemService(AudioManager.class);
+            if (am.isBluetoothScoOn()) return true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                android.media.AudioDeviceInfo d = am.getCommunicationDevice();
+                if (d != null && (d.getType() == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO || d.getType() == android.media.AudioDeviceInfo.TYPE_BLE_HEADSET)) return true;
+            }
+        } catch (RuntimeException ignored) {}
+        return false;
+    }
+
+    /** Vuelve al micrófono del móvil: los pinganillos graban mal los ronquidos y gastan mucha batería en modo «llamada». */
+    static void micMovil(Context c) {
+        try {
+            AudioManager am = c.getSystemService(AudioManager.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) am.clearCommunicationDevice();
+            if (am.isBluetoothScoOn()) { am.stopBluetoothSco(); am.setBluetoothScoOn(false); }
+        } catch (RuntimeException ignored) {}
+    }
+
     static void audioNormal(Context c) {
         try {
             AudioManager am = c.getSystemService(AudioManager.class);
