@@ -258,6 +258,12 @@ public class MainActivity extends Activity {
         // ---- Alarmas que suenan con la app cerrada (las programa el reloj de Android) ----
         /** La web manda su lista de alarmas: [{id, on, hora, tono, sub}] */
         @JavascriptInterface public void setAlarmas(String json) { Alarmas.guardar(MainActivity.this, json); }
+        /** Entrar con Google con el selector de cuentas de Android; el resultado llega a window.googleNativo(token, error). */
+        @JavascriptInterface public void entrarGoogle(String clientId) {
+            runOnUiThread(() -> Google.entrar(MainActivity.this, clientId, (token, error) ->
+                runOnUiThread(() -> web.evaluateJavascript("window.googleNativo && window.googleNativo("
+                    + JSONObject.quote(token) + "," + JSONObject.quote(error) + ")", null))));
+        }
         /** Dictar la pregunta a Luna con el reconocimiento de voz de Android; el texto llega a window.dictado(texto, error). */
         @JavascriptInterface public void dictar() {
             runOnUiThread(() -> {
