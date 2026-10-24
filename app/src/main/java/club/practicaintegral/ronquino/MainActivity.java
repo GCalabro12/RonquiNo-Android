@@ -236,6 +236,10 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> {
             if (encendida) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            // Mientras se monitorea, la pantalla de la app se ve encima del bloqueo: un toque y vuelve «Monitoreando»
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) setShowWhenLocked(encendida);
+            else if (encendida) getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+            else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         });
     }
 
