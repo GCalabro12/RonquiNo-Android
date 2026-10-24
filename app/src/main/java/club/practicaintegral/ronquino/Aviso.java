@@ -26,11 +26,27 @@ final class Aviso {
             listo = estado == TextToSpeech.SUCCESS;
             if (!listo) return;
             tts.setLanguage(new Locale("es", "ES"));
+            mejorVoz();
             tts.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             if (pendiente != null) { tts.speak(pendiente, TextToSpeech.QUEUE_FLUSH, null, "aviso"); pendiente = null; }
         });
+    }
+
+    /** De las voces en español del móvil, la de más calidad que no necesite internet (si no, la de más calidad). */
+    private static void mejorVoz() {
+        try {
+            android.speech.tts.Voice mejor = null;
+            for (android.speech.tts.Voice v : tts.getVoices()) {
+                if (v.getLocale() == null || !"es".equals(v.getLocale().getLanguage())) continue;
+                if (v.getFeatures() != null && v.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) continue;
+                int puntos = v.getQuality() + (v.isNetworkConnectionRequired() ? -50 : 0) + ("ES".equals(v.getLocale().getCountry()) ? 20 : 0);
+                int puntosMejor = mejor == null ? Integer.MIN_VALUE : mejor.getQuality() + (mejor.isNetworkConnectionRequired() ? -50 : 0) + ("ES".equals(mejor.getLocale().getCountry()) ? 20 : 0);
+                if (puntos > puntosMejor) mejor = v;
+            }
+            if (mejor != null) tts.setVoice(mejor);
+        } catch (RuntimeException ignored) {}
     }
 
     /** ¿Hay auriculares conectados (con cable, bluetooth o USB)? */
