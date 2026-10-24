@@ -33,6 +33,8 @@
     <!-- La voz del aviso de ronquido (Android 11+ necesita poder ver el motor de voz) -->
     <queries>
         <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
+        <!-- Dictado dentro de la app («Habla con Luna») -->
+        <intent><action android:name="android.speech.RecognitionService" /></intent>
     </queries>
 
     <application

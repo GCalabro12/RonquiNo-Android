@@ -13,7 +13,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
@@ -57,6 +59,7 @@ public class MainActivity extends Activity {
     private boolean cargada;
     private PermissionRequest micPendiente;
     private ValueCallback<Uri[]> archivoPendiente;
+    private SpeechRecognizer reconocedor;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -258,6 +261,35 @@ public class MainActivity extends Activity {
         /** Dictar la pregunta a Luna con el reconocimiento de voz de Android; el texto llega a window.dictado(texto, error). */
         @JavascriptInterface public void dictar() {
             runOnUiThread(() -> {
+                // Dentro de la app, sin la ventana de Google: el texto va apareciendo en la caja (window.dictadoParcial)
+                if (SpeechRecognizer.isRecognitionAvailable(MainActivity.this)) {
+                    try {
+                        if (reconocedor != null) reconocedor.destroy();
+                        reconocedor = SpeechRecognizer.createSpeechRecognizer(MainActivity.this);
+                        reconocedor.setRecognitionListener(new RecognitionListener() {
+                            @Override public void onReadyForSpeech(Bundle b) {}
+                            @Override public void onBeginningOfSpeech() {}
+                            @Override public void onRmsChanged(float v) {}
+                            @Override public void onBufferReceived(byte[] b) {}
+                            @Override public void onEndOfSpeech() {}
+                            @Override public void onEvent(int t, Bundle b) {}
+                            @Override public void onError(int e) { dictado("", e == SpeechRecognizer.ERROR_NO_MATCH || e == SpeechRecognizer.ERROR_SPEECH_TIMEOUT ? "cancelado" : "error " + e); }
+                            @Override public void onPartialResults(Bundle b) {
+                                ArrayList<String> r = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                                if (r != null && !r.isEmpty()) web.evaluateJavascript("window.dictadoParcial && window.dictadoParcial(" + JSONObject.quote(r.get(0)) + ")", null);
+                            }
+                            @Override public void onResults(Bundle b) {
+                                ArrayList<String> r = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                                dictado(r != null && !r.isEmpty() ? r.get(0) : "", r != null && !r.isEmpty() ? "" : "cancelado");
+                            }
+                        });
+                        reconocedor.startListening(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                                .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                                .putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true));
+                        return;
+                    } catch (RuntimeException ignored) {}
+                }
                 try {
                     startActivityForResult(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                             .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -266,6 +298,7 @@ public class MainActivity extends Activity {
                 } catch (RuntimeException e) { dictado("", "sin-dictado"); }
             });
         }
+        @JavascriptInterface public void pararDictado() { runOnUiThread(() -> { if (reconocedor != null) reconocedor.stopListening(); }); }
         /** Alarma reforzada: abre el lector de códigos de barras; la respuesta llega a window.codigoEscaneado(valor, error). */
         @JavascriptInterface public void escanearCodigo() {
             runOnUiThread(() -> {
