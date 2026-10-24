@@ -368,6 +368,8 @@ public class MainActivity extends Activity {
         /** Voz del móvil para Luna (si la voz de Gemini no llega a tiempo). */
         @JavascriptInterface public void hablar(String texto) { runOnUiThread(() -> Aviso.hablar(MainActivity.this, texto)); }
         @JavascriptInterface public void callar() { Aviso.callar(); }
+        /** Abre los ajustes de voz de Android (motor y voz con que lee Luna). */
+        @JavascriptInterface public void ajustesVoz() { abrir(new Intent("com.android.settings.TTS_SETTINGS")); }
 
         // ---------- La noche ----------
         /** Empieza (true) o termina (false) la escucha: pantalla encendida + servicio con el micrófono. Al terminar, todo como estaba. */
