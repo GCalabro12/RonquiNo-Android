@@ -347,6 +347,8 @@ public class MainActivity extends Activity {
 
         /** Deja «No molestar» y el wifi como estaban antes de la noche. */
         @JavascriptInterface public void restaurar() { Modos.restaurar(MainActivity.this); }
+        /** Luz de la habitación (lux) durante la noche; -1 si el móvil no tiene sensor de luz. */
+        @JavascriptInterface public double luz() { return Luz.lux; }
         @JavascriptInterface public void audioNormal() { Modos.audioNormal(MainActivity.this); }
 
         // ---------- Aviso de ronquido por los auriculares ----------
@@ -360,6 +362,7 @@ public class MainActivity extends Activity {
         // ---------- La noche ----------
         /** Empieza (true) o termina (false) la escucha: pantalla encendida + servicio con el micrófono. Al terminar, todo como estaba. */
         @JavascriptInterface public void noche(boolean on) {
+            if (on) Luz.empezar(MainActivity.this); else Luz.parar(MainActivity.this);
             NocheService.escuchando = on;
             NocheService.actualizar(MainActivity.this);
             pantalla(on);
