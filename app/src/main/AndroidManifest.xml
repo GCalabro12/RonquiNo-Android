@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Micrófono para escuchar la noche (la web lo usa dentro de la app) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Batería de los pinganillos (para recordar cargarlos antes de dormir) -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- Poner y quitar «No molestar» -->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
