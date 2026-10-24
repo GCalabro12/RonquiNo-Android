@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 
 import java.util.Locale;
 
@@ -16,17 +17,25 @@ final class Aviso {
     private static TextToSpeech tts;
     private static boolean listo;
     private static String pendiente;
+    private static Context app;
+    private static int volAntes = -1; // volumen que había antes de subirlo para el aviso
 
     private Aviso() {}
 
     /** Prepara la voz (tarda un momento la primera vez). */
     static void preparar(Context c) {
         if (tts != null) return;
-        tts = new TextToSpeech(c.getApplicationContext(), estado -> {
+        app = c.getApplicationContext();
+        tts = new TextToSpeech(app, estado -> {
             listo = estado == TextToSpeech.SUCCESS;
             if (!listo) return;
             tts.setLanguage(new Locale("es", "ES"));
             mejorVoz();
+            tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override public void onStart(String id) {}
+                @Override public void onDone(String id) { if ("aviso".equals(id)) bajarVolumen(); }
+                @Override public void onError(String id) { if ("aviso".equals(id)) bajarVolumen(); }
+            });
             tts.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
@@ -76,10 +85,27 @@ final class Aviso {
 
     static void callar() { if (tts != null) tts.stop(); pendiente = null; }
 
+    /** Para que el aviso se oiga: el volumen multimedia al menos a 3/4 mientras habla; luego vuelve a como estaba. */
+    private static void subirVolumen(Context c) {
+        try {
+            AudioManager am = c.getSystemService(AudioManager.class);
+            int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), cur = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+            int min = (int) Math.ceil(max * 0.75);
+            if (cur < min) { if (volAntes < 0) volAntes = cur; am.setStreamVolume(AudioManager.STREAM_MUSIC, min, 0); }
+        } catch (RuntimeException ignored) {}
+    }
+
+    private static void bajarVolumen() {
+        if (volAntes < 0 || app == null) return;
+        try { app.getSystemService(AudioManager.class).setStreamVolume(AudioManager.STREAM_MUSIC, volAntes, 0); } catch (RuntimeException ignored) {}
+        volAntes = -1;
+    }
+
     /** Lo dice solo si hay auriculares; sin ellos no suena nada y devuelve false. */
     static boolean decir(Context c, String texto) {
         if (!auriculares(c)) return false;
         preparar(c);
+        subirVolumen(c);
         if (listo) tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "aviso");
         else pendiente = texto;
         return true;
